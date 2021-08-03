@@ -18,9 +18,7 @@ import pygame
 version = '1.0.011720'
 
 # Globals
-# TODO: find a better place for this sound file.
-#  mfile = '/Users/simsdj/sandbox/me-too.mp3'
-mfile = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'resource', 
+mfile = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resource', 
         'me-too.mp3')
 if not os.path.exists(mfile):
     sys.stderr.write(f"ERROR: Can not find specified sound file {mfile}! Check "
@@ -31,7 +29,7 @@ def get_args():
     parser = argparse.ArgumentParser(description = __doc__)
     parser.add_argument(
         'method',
-        metavar='<method>',
+        metavar='[timer | stopwatch]',
         default='timer',
         choices=['timer', 'stopwatch'],
         help='Type of timer you want. A `timer` will count down from input '
