@@ -6,16 +6,19 @@
 Rudimentary timer program to either count down time with an alarm, or count
 elapsed time like a stopwatch.  
 """
+import re
 import os
 import sys
 import time
 import argparse
 
+from pprint import pprint as pp # noqa
+
 # Need to change an env variable to suppress start up message
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 
-version = '1.0.011720'
+version = '2.0.080321'
 
 # Globals
 mfile = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resource', 
@@ -47,8 +50,9 @@ def get_args():
         metavar = '<time>',
         help = 'Time in the format of hh:mm:ss for the `timer` function. You '
             'can leave out the seconds if you wish, but the hours and minutes '
-            'are required. This is not needed unless you are using the timer '
-            'function.'
+            'are required. NOTE: Can now enter time in the format #h#m#s (e.g. '
+            '1h5m30s) instead of 01:05:30 to make things a little easier to '
+            'type. The old way may be deprecated.'
     )
     parser.add_argument(
         '-v', '--version',
@@ -62,16 +66,27 @@ def get_args():
                 "HH:MM:ss when using the `timer` function.\n")
         sys.exit(1)
 
-    hours = None
-    minutes = None
-    seconds = None
-
     global mfile
     if args.tone:
         mfile = args.tone
 
+    hours   = 0
+    minutes = 0
+    seconds = 0
+
     if args.settime:
-        hours, minutes, seconds = map(int, args.settime.split(':'))
+        if any(x in ('h', 'm', 's') for x in args.settime):
+            # We have the new h, m, s format for time (ex. 1m, 3m4s, 5h4m0s)
+            elems = re.findall('\d+[hms]', args.settime)
+            for e in elems:
+                if e.endswith('h'):
+                    hours = int(e.rstrip('h'))
+                elif e.endswith('m'):
+                    minutes = int(e.rstrip('m'))
+                elif e.endswith('s'):
+                    seconds = int(e.rstrip('s'))
+        else:
+            hours, minutes, seconds = map(int, args.settime.split(':'))
     return args.method, hours, minutes, seconds
 
 def elapsed_time(time_start):
